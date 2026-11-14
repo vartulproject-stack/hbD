@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Darlo!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #matrix { z-index: 1; }
+        #particleCanvas { z-index: 2; pointer-events: none; }
+
+        .final-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #140014 0%, #000000 100%);
+            z-index: 3;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+        #starCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .final-screen h1 {
+            font-size: clamp(26px, 6vw, 45px);
+            color: #ffca28;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #ffca28, 0 0 30px #ff8f00;
+            letter-spacing: 2px;
+        }
+        .cute-gif {
+            width: 220px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.6);
+            margin-bottom: 25px;
+        }
+        .romantic-msg {
+            font-size: clamp(16px, 4vw, 22px);
+            color: #ff9ebb;
+            max-width: 550px;
+            line-height: 1.6;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 133, 162, 0.5);
+        }
+        .music-prompt {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+            color: #ff85a2;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10;
+            padding: 0 20px;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="vkvk.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-prompt" id="musicPrompt">✨ Tap anywhere on screen for music & surprise! ✨</div>
+
+    <canvas id="matrix"></canvas>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="final-screen" id="finalScreen">
+        <canvas id="starCanvas"></canvas>
+        <h1>HAPPY BIRTHDAY DARLO!</h1>
+        <img class="cute-gif" src="vkvk.gif" alt="Cute Birthday GIF">
+        <p class="romantic-msg">
+            You are my favorite notification, my happiest thought, and the best part of my every day. 
+            Thank you for bringing so much love and light into my life. I love you endlessly! ❤️
+        </p>
+    </div>
+
+    <script>
+        const matrixCanvas = document.getElementById('matrix');
+        const mCtx = matrixCanvas.getContext('2d');
+        const pCanvas = document.getElementById('particleCanvas');
+        const pCtx = pCanvas.getContext('2d');
+
+        function resizeAll() {
+            matrixCanvas.width = pCanvas.width = window.innerWidth;
+            matrixCanvas.height = pCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeAll);
+        resizeAll();
+
+        // 1. Pink Matrix Rain
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789HAPPYBIRTHDAYDARLO<3";
+        const fontSize = 14;
+        let columns = Math.floor(matrixCanvas.width / fontSize);
+        let drops = Array(columns).fill(1);
+
+        function drawMatrix() {
+            mCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            mCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            mCtx.fillStyle = '#ff2a6d';
+            mCtx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                mCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+
+        // 2. Dot-Matrix / Pixel Text & Heart Renderer (Exact Reel Style)
+        function drawDotText(text) {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            
+            const tempCanvas = document.createElement('canvas');
+            const tCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = pCanvas.width;
+            tempCanvas.height = pCanvas.height;
+
+            const size = text === "HEART" ? Math.min(pCanvas.width * 0.45, 220) : Math.min(pCanvas.width * 0.22, 130);
+            tCtx.fillStyle = "#fff";
+            tCtx.textAlign = "center";
+            tCtx.textBaseline = "middle";
+
+            if (text === "HEART") {
+                // Draw Heart Shape
+                const x = tempCanvas.width / 2;
+                const y = tempCanvas.height / 2 - size * 0.3;
+                tCtx.beginPath();
+                tCtx.moveTo(x, y + size * 0.3);
+                tCtx.bezierCurveTo(x, y, x - size * 0.5, y, x - size * 0.5, y + size * 0.3);
+                tCtx.bezierCurveTo(x - size * 0.5, y + size * 0.6, x, y + size * 0.85, x, y + size);
+                tCtx.bezierCurveTo(x, y + size * 0.85, x + size * 0.5, y + size * 0.6, x + size * 0.5, y + size * 0.3);
+                tCtx.bezierCurveTo(x + size * 0.5, y, x, y, x, y + size * 0.3);
+                tCtx.fill();
+            } else {
+                tCtx.font = `bold ${size}px Arial, sans-serif`;
+                tCtx.fillText(text, tempCanvas.width / 2, tempCanvas.height / 2);
+            }
+
+            const imgData = tCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height).data;
+            const gap = 6; // Dot spacing
+
+            for (let y = 0; y < tempCanvas.height; y += gap) {
+                for (let x = 0; x < tempCanvas.width; x += gap) {
+                    const alpha = imgData[(y * tempCanvas.width + x) * 4 + 3];
+                    if (alpha > 128) {
+                        pCtx.fillStyle = "#ff9ebb";
+                        pCtx.shadowColor = "#ff1493";
+                        pCtx.shadowBlur = 8;
+                        pCtx.beginPath();
+                        pCtx.arc(x, y, 2.3, 0, Math.PI * 2);
+                        pCtx.fill();
+                    }
+                }
+            }
+        }
+
+        // 3. Twinkling Stars for Final Screen
+        function startStars() {
+            const sCanvas = document.getElementById('starCanvas');
+            const sCtx = sCanvas.getContext('2d');
+            sCanvas.width = window.innerWidth;
+            sCanvas.height = window.innerHeight;
+
+            const stars = Array.from({ length: 120 }, () => ({
+                x: Math.random() * sCanvas.width,
+                y: Math.random() * sCanvas.height,
+                r: Math.random() * 2 + 0.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.03 + 0.01
+            }));
+
+            function animateStars() {
+                sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+                stars.forEach(s => {
+                    s.alpha += s.speed;
+                    if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+                    sCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha)})`;
+                    sCtx.beginPath();
+                    sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    sCtx.fill();
+                });
+                requestAnimationFrame(animateStars);
+            }
+            animateStars();
+        }
+
+        // 4. Sequence Controller
+        const sequence = ["3", "2", "1", "Happy", "Birthday", "Darlo", "HEART"];
+        let index = 0;
+        let started = false;
+
+        function runSequence() {
+            if (index < sequence.length) {
+                drawDotText(sequence[index]);
+                index++;
+                setTimeout(runSequence, 1100);
+            } else {
+                pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+                matrixCanvas.style.display = "none";
+                pCanvas.style.display = "none";
+                document.getElementById('finalScreen').style.display = "flex";
+                startStars();
+            }
+        }
+
+        window.addEventListener('click', () => {
+            if (!started) {
+                started = true;
+                document.getElementById('musicPrompt').style.display = 'none';
+                document.getElementById('bg-music').play().catch(e => console.log(e));
+                runSequence();
+            }
+        });
+    </script>
+</body>
+</html>
